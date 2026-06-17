@@ -104,6 +104,25 @@ body {
 .btn-danger:hover { background: #ffebee; }
 .btn-sm { width: auto; display: inline-block; padding: 8px 18px; font-size: 14px; }
 
+/* 加载状态 */
+.loading-overlay {
+  text-align: center;
+  padding: 40px;
+  color: #888;
+  font-size: 14px;
+}
+.loading-spinner {
+  display: inline-block;
+  width: 24px; height: 24px;
+  border: 3px solid #e0e0e0;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
 /* 问卷页 */
 .quiz-header {
   display: flex;
@@ -253,6 +272,7 @@ body {
   .member-list { grid-template-columns: 1fr; }
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -267,7 +287,9 @@ body {
     <div class="card">
       <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar" style="width:0%"></div></div>
       <p class="progress-text"><span id="done-count">0</span> / 12 人已完成</p>
-      <div class="participant-grid" id="person-grid"></div>
+      <div class="participant-grid" id="person-grid">
+        <div class="loading-overlay"><span class="loading-spinner"></span>加载中...</div>
+      </div>
       <button class="btn btn-primary" onclick="showResult()">查看分组结果</button>
       <button class="btn btn-outline" style="margin-top:10px" onclick="resetAll()">重置所有数据</button>
     </div>
@@ -284,7 +306,7 @@ body {
       </div>
     </div>
     <div id="questions-container"></div>
-    <button class="btn btn-primary" onclick="submitQuiz()" style="margin-top:16px">提交问卷</button>
+    <button class="btn btn-primary" id="submit-btn" onclick="submitQuiz()" style="margin-top:16px">提交问卷</button>
   </div>
 
   <!-- ========== 结果页 ========== -->
@@ -308,11 +330,15 @@ body {
 </div>
 
 <script>
+// ==================== Supabase 初始化 ====================
+const SUPABASE_URL = 'https://ktlwijaduiqwxelparvu.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0bHdpamFkdWlxd3hlbHBhcnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MDgwNTIsImV4cCI6MjA5NzI4NDA1Mn0.CKuzUMBWptp24hNkgt2BMf6oSbVaPQrcmEdPoCaTdYw';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 // ==================== 常量 ====================
 const TOTAL = 12;
 const GROUP_SIZE = 4;
 const ADMIN_PWD = 'admin123';
-const STORAGE_KEY = 'dorm_quiz_data';
 
 // 问卷题目
 const QUESTIONS = [
@@ -327,13 +353,33 @@ const QUESTIONS = [
   { id: 'q9', text: '是否愿意全寝室一起购买公用电器（如洗衣机、饮水机等）？', opts: ['完全不愿意', '不太愿意', '看情况/无所谓', '比较愿意', '非常愿意，主动发起'] },
 ];
 
-// ==================== 数据存取 ====================
-function loadData() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) { return {}; }
+// ==================== 数据存取（Supabase） ====================
+async function loadData() {
+  try {
+    const { data, error } = await supabase.from('responses').select('*');
+    if (error) throw error;
+    const result = {};
+    (data || []).forEach(row => { result[row.person_num] = row.answers; });
+    return result;
+  } catch(e) {
+    console.error('加载数据失败:', e);
+    return {};
+  }
 }
 
-function saveData(data) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+async function saveOneResponse(personNum, answers) {
+  try {
+    const { error } = await supabase.from('responses').upsert({
+      person_num: personNum,
+      answers: answers,
+      updated_at: new Date().toISOString()
+    });
+    if (error) throw error;
+    return true;
+  } catch(e) {
+    console.error('保存失败:', e);
+    return false;
+  }
 }
 
 // ==================== 页面导航 ====================
@@ -342,11 +388,11 @@ function showPage(id) {
   document.getElementById(id).classList.remove('hidden');
 }
 
-function goHome() { showPage('home-page'); renderHome(); }
+async function goHome() { showPage('home-page'); await renderHome(); }
 
 // ==================== 首页 ====================
-function renderHome() {
-  const data = loadData();
+async function renderHome() {
+  const data = await loadData();
   const doneCount = Object.keys(data).length;
   const pct = Math.round((doneCount / TOTAL) * 100);
 
@@ -376,9 +422,9 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-function startQuiz(personNum) {
+async function startQuiz(personNum) {
   currentPerson = personNum;
-  const data = loadData();
+  const data = await loadData();
   currentAnswers = data[personNum] ? { ...data[personNum] } : {};
 
   document.getElementById('quiz-badge').textContent = personNum;
@@ -421,18 +467,29 @@ function saveExtra(id, value) {
   currentAnswers[id] = value;
 }
 
-function submitQuiz() {
+async function submitQuiz() {
   // 检查必答题是否全部回答（仅主问题id，跳过extra字段）
   const mainIds = QUESTIONS.map(q => q.id);
   if (mainIds.some(id => !currentAnswers[id])) {
     alert('请回答所有问题后再提交！');
     return;
   }
-  const data = loadData();
-  data[currentPerson] = { ...currentAnswers };
-  saveData(data);
-  alert(`第 ${currentPerson} 位同学问卷已提交！`);
-  goHome();
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = '提交中...';
+
+  const ok = await saveOneResponse(currentPerson, { ...currentAnswers });
+
+  btn.disabled = false;
+  btn.textContent = '提交问卷';
+
+  if (ok) {
+    alert(`第 ${currentPerson} 位同学问卷已提交！`);
+    goHome();
+  } else {
+    alert('提交失败，请检查网络后重试');
+  }
 }
 
 // ==================== 密码弹窗 ====================
@@ -477,8 +534,7 @@ function getFeatureVector(answers) {
   return QUESTIONS.map(q => answers[q.id]);
 }
 
-function computeMatching() {
-  const data = loadData();
+function computeMatching(data) {
   const persons = Object.keys(data).map(Number);
   if (persons.length < TOTAL) return null;
 
@@ -587,8 +643,8 @@ function computeMatching() {
 }
 
 // ==================== 结果页 ====================
-function showResult() {
-  const data = loadData();
+async function showResult() {
+  const data = await loadData();
   const doneCount = Object.keys(data).length;
   if (doneCount < TOTAL) {
     alert(`当前仅 ${doneCount} / ${TOTAL} 人完成问卷，需全部完成后才能查看结果。`);
@@ -596,7 +652,7 @@ function showResult() {
   }
 
   showPwdModal(() => {
-    const groups = computeMatching();
+    const groups = computeMatching(data);
     if (!groups) { alert('数据异常，请重置后重试'); return; }
 
     const colors = { A: '#667eea', B: '#e91e63', C: '#4caf50' };
@@ -626,9 +682,14 @@ function showResult() {
 }
 
 // ==================== 重置 ====================
-function resetAll() {
+async function resetAll() {
   if (confirm('确定要清除所有问卷数据吗？此操作不可恢复！')) {
-    localStorage.removeItem(STORAGE_KEY);
+    try {
+      await supabase.from('responses').delete().neq('person_num', -1);
+      alert('所有数据已清除！');
+    } catch(e) {
+      alert('清除失败，请检查网络后重试');
+    }
     goHome();
   }
 }

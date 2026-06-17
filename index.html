@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>宿舍分配问卷系统</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  color: #333;
+}
+
+.container { max-width: 640px; margin: 0 auto; padding: 20px; }
+
+/* 头部 */
+.header {
+  text-align: center;
+  padding: 30px 0 20px;
+  color: #fff;
+}
+.header h1 { font-size: 28px; margin-bottom: 6px; }
+.header p { font-size: 14px; opacity: 0.85; }
+
+/* 卡片 */
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+}
+
+/* 首页 - 参与者网格 */
+.participant-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.person-card {
+  aspect-ratio: 1;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s;
+  border: 2px solid #e0e0e0;
+  background: #fafafa;
+  font-size: 13px;
+  gap: 6px;
+}
+.person-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+.person-card .num { font-size: 24px; font-weight: 700; }
+.person-card .status { font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+
+.person-card.done { border-color: #4caf50; background: #f1f8e9; }
+.person-card.done .status { background: #4caf50; color: #fff; }
+.person-card.pending .status { background: #e0e0e0; color: #888; }
+
+.progress-bar-wrap {
+  background: #e0e0e0;
+  border-radius: 8px;
+  height: 8px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  border-radius: 8px;
+  transition: width 0.4s;
+}
+.progress-text { text-align: center; font-size: 14px; color: #666; margin-bottom: 16px; }
+
+/* 按钮 */
+.btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
+.btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+.btn-outline {
+  background: #fff;
+  color: #667eea;
+  border: 2px solid #667eea;
+  margin-bottom: 10px;
+}
+.btn-outline:hover { background: #f5f0ff; }
+.btn-danger { background: #fff; color: #e53935; border: 2px solid #e53935; font-size: 14px; padding: 10px; }
+.btn-danger:hover { background: #ffebee; }
+.btn-sm { width: auto; display: inline-block; padding: 8px 18px; font-size: 14px; }
+
+/* 问卷页 */
+.quiz-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.quiz-header .person-badge {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+}
+.quiz-header .info { flex: 1; }
+.quiz-header .info .name { font-size: 18px; font-weight: 600; color: #fff; }
+.quiz-header .info .hint { font-size: 13px; color: rgba(255,255,255,0.8); }
+
+.question-block {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 12px;
+}
+.question-block .q-num {
+  display: inline-block;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 26px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.question-block .q-title { font-size: 16px; font-weight: 600; margin-bottom: 12px; }
+
+.options { display: flex; flex-direction: column; gap: 8px; }
+.option {
+  padding: 12px 16px;
+  border: 2px solid #e8e8e8;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+.option:hover { border-color: #b39ddb; background: #faf8ff; }
+.option.selected { border-color: #667eea; background: #f0edff; font-weight: 500; }
+
+/* 额外补充字段（MBTI、兴趣爱好等） */
+.extra-field {
+  margin-top: 10px;
+}
+.extra-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #888;
+  margin-bottom: 4px;
+}
+.extra-field input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid #e8e8e8;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.extra-field input:focus { border-color: #667eea; }
+
+/* 结果页 */
+.result-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 16px;
+  border-left: 5px solid transparent;
+}
+.result-card.dorm-a { border-left-color: #667eea; }
+.result-card.dorm-b { border-left-color: #e91e63; }
+.result-card.dorm-c { border-left-color: #4caf50; }
+.result-card h3 { font-size: 18px; margin-bottom: 4px; }
+.result-card .score { font-size: 13px; color: #888; margin-bottom: 12px; }
+
+.member-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.member-tag {
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.member-tag .dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* 弹窗 */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 30px;
+  width: 90%;
+  max-width: 380px;
+}
+.modal h3 { margin-bottom: 16px; font-size: 18px; }
+.modal input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 16px;
+  margin-bottom: 16px;
+  outline: none;
+}
+.modal input:focus { border-color: #667eea; }
+.modal .err { color: #e53935; font-size: 13px; margin-bottom: 10px; }
+.modal-btns { display: flex; gap: 10px; }
+.modal-btns .btn { flex: 1; }
+
+/* 工具 */
+.top-bar { display: flex; justify-content: space-between; margin-bottom: 16px; }
+.top-bar .btn-sm { width: auto; }
+
+.hidden { display: none !important; }
+
+@media (max-width: 400px) {
+  .participant-grid { grid-template-columns: repeat(3, 1fr); }
+  .member-list { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>宿舍分配系统</h1>
+    <p>12人 · 3个宿舍 · 找到最合拍的室友</p>
+  </div>
+
+  <!-- ========== 首页 ========== -->
+  <div id="home-page">
+    <div class="card">
+      <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar" style="width:0%"></div></div>
+      <p class="progress-text"><span id="done-count">0</span> / 12 人已完成</p>
+      <div class="participant-grid" id="person-grid"></div>
+      <button class="btn btn-primary" onclick="showResult()">查看分组结果</button>
+      <button class="btn btn-outline" style="margin-top:10px" onclick="resetAll()">重置所有数据</button>
+    </div>
+  </div>
+
+  <!-- ========== 问卷页 ========== -->
+  <div id="quiz-page" class="hidden">
+    <button class="btn-sm btn-outline" onclick="goHome()" style="margin-bottom:12px">← 返回列表</button>
+    <div class="quiz-header">
+      <div class="person-badge" id="quiz-badge">1</div>
+      <div class="info">
+        <div class="name" id="quiz-name">第 1 位同学</div>
+        <div class="hint" id="quiz-hint">请回答以下问题</div>
+      </div>
+    </div>
+    <div id="questions-container"></div>
+    <button class="btn btn-primary" onclick="submitQuiz()" style="margin-top:16px">提交问卷</button>
+  </div>
+
+  <!-- ========== 结果页 ========== -->
+  <div id="result-page" class="hidden">
+    <button class="btn-sm btn-outline" onclick="goHome()" style="margin-bottom:12px">← 返回列表</button>
+    <div id="result-content"></div>
+  </div>
+</div>
+
+<!-- 密码弹窗 -->
+<div id="pwd-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <h3>请输入管理密码</h3>
+    <input type="password" id="pwd-input" placeholder="输入密码" onkeydown="if(event.key==='Enter')checkPwd()">
+    <p class="err hidden" id="pwd-err">密码错误，请重试</p>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="closePwdModal()">取消</button>
+      <button class="btn btn-primary" onclick="checkPwd()">确认</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== 常量 ====================
+const TOTAL = 12;
+const GROUP_SIZE = 4;
+const ADMIN_PWD = 'admin123';
+const STORAGE_KEY = 'dorm_quiz_data';
+
+// 问卷题目
+const QUESTIONS = [
+  { id: 'q1', text: '晚上通常几点睡觉？', opts: ['22:00前', '22:00-23:00', '23:00-24:00', '00:00-01:00', '01:00之后'] },
+  { id: 'q2', text: '早上通常几点起床？（没有早课的情况）', opts: ['6:00前', '6:00-7:00', '7:00-8:00', '8:00-9:00', '9:00之后'] },
+  { id: 'q3', text: '你的日常卫生习惯如何？（洗澡频率、衣物换洗、外卖/垃圾处理等）', opts: ['非常爱干净：勤洗澡洗衣、垃圾即时清理', '比较整洁：有规律地打理个人卫生', '一般水平：不算特别勤快但也不会太乱', '比较随性：偶尔堆积衣物或外卖餐盒', '非常随意：不太在意这些生活细节'] },
+  { id: 'q4', text: '室友在房间发出声音（音乐/游戏/电话），你能接受吗？', opts: ['完全不能接受', '不太能接受', '看情况可以接受', '基本能接受', '完全没问题'] },
+  { id: 'q5', text: '你的性格倾向是？（可补充MBTI和兴趣爱好）', opts: ['非常内向，喜欢独处', '偏内向，小圈子社交', '中性，看情况而定', '偏外向，喜欢热闹', '非常外向，社交达人'], extra: [{ id: 'q5_mbti', label: 'MBTI（选填）', placeholder: '如 INTJ、ENFP 等' }, { id: 'q5_hobbies', label: '兴趣爱好（选填）', placeholder: '如 打游戏、篮球、看剧 等' }] },
+  { id: 'q6', text: '空调一般开几度？', opts: ['20°C 以下', '20-22°C', '23-24°C', '25-26°C', '26°C 以上 / 不开空调'] },
+  { id: 'q7', text: '在宿舍你以学习为主吗？', opts: ['几乎全部时间都在学习', '学习为主，偶尔娱乐', '学习和娱乐各半', '娱乐为主，偶尔学习', '基本不学习'] },
+  { id: 'q8', text: '你对室友带访客（朋友/同学）来宿舍的态度？', opts: ['完全不能接受', '偶尔可以，提前打招呼', '无所谓', '比较欢迎', '非常欢迎，热闹就好'] },
+  { id: 'q9', text: '是否愿意全寝室一起购买公用电器（如洗衣机、饮水机等）？', opts: ['完全不愿意', '不太愿意', '看情况/无所谓', '比较愿意', '非常愿意，主动发起'] },
+];
+
+// ==================== 数据存取 ====================
+function loadData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) { return {}; }
+}
+
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+// ==================== 页面导航 ====================
+function showPage(id) {
+  document.querySelectorAll('#home-page, #quiz-page, #result-page').forEach(el => el.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+
+function goHome() { showPage('home-page'); renderHome(); }
+
+// ==================== 首页 ====================
+function renderHome() {
+  const data = loadData();
+  const doneCount = Object.keys(data).length;
+  const pct = Math.round((doneCount / TOTAL) * 100);
+
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('done-count').textContent = doneCount;
+
+  let html = '';
+  for (let i = 1; i <= TOTAL; i++) {
+    const isDone = data[i] !== undefined;
+    const cls = isDone ? 'done' : 'pending';
+    const statusText = isDone ? '已完成' : '待填写';
+    html += `<div class="person-card ${cls}" onclick="startQuiz(${i})">
+      <span class="num">${i}</span>
+      <span class="status">${statusText}</span>
+    </div>`;
+  }
+  document.getElementById('person-grid').innerHTML = html;
+}
+
+// ==================== 问卷页 ====================
+let currentPerson = null;
+let currentAnswers = {};
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function startQuiz(personNum) {
+  currentPerson = personNum;
+  const data = loadData();
+  currentAnswers = data[personNum] ? { ...data[personNum] } : {};
+
+  document.getElementById('quiz-badge').textContent = personNum;
+  document.getElementById('quiz-name').textContent = `第 ${personNum} 位同学`;
+  const hint = data[personNum] ? '已提交，可修改' : '请回答以下问题';
+  document.getElementById('quiz-hint').textContent = hint;
+
+  let html = '';
+  QUESTIONS.forEach((q, idx) => {
+    html += `<div class="question-block">
+      <span class="q-num">${idx + 1}</span>
+      <div class="q-title">${q.text}</div>
+      <div class="options">`;
+    q.opts.forEach((opt, optIdx) => {
+      const score = optIdx + 1;
+      const sel = currentAnswers[q.id] === score ? ' selected' : '';
+      html += `<div class="option${sel}" onclick="selectOption(this, '${q.id}', ${score})">${opt}</div>`;
+    });
+    html += '</div>';
+    // 额外补充字段（MBTI、兴趣爱好等，不影响匹配算法）
+    if (q.extra) {
+      q.extra.forEach(e => {
+        const val = currentAnswers[e.id] || '';
+        html += `<div class="extra-field"><label>${e.label}</label><input type="text" placeholder="${e.placeholder}" value="${escapeHtml(val)}" onchange="saveExtra('${e.id}', this.value)"></div>`;
+      });
+    }
+    html += '</div>';
+  });
+  document.getElementById('questions-container').innerHTML = html;
+  showPage('quiz-page');
+}
+
+function selectOption(el, qid, score) {
+  el.parentElement.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  currentAnswers[qid] = score;
+}
+
+function saveExtra(id, value) {
+  currentAnswers[id] = value;
+}
+
+function submitQuiz() {
+  // 检查必答题是否全部回答（仅主问题id，跳过extra字段）
+  const mainIds = QUESTIONS.map(q => q.id);
+  if (mainIds.some(id => !currentAnswers[id])) {
+    alert('请回答所有问题后再提交！');
+    return;
+  }
+  const data = loadData();
+  data[currentPerson] = { ...currentAnswers };
+  saveData(data);
+  alert(`第 ${currentPerson} 位同学问卷已提交！`);
+  goHome();
+}
+
+// ==================== 密码弹窗 ====================
+let pwdCallback = null;
+
+function showPwdModal(callback) {
+  pwdCallback = callback;
+  document.getElementById('pwd-modal').classList.remove('hidden');
+  document.getElementById('pwd-input').value = '';
+  document.getElementById('pwd-err').classList.add('hidden');
+  setTimeout(() => document.getElementById('pwd-input').focus(), 100);
+}
+
+function closePwdModal() {
+  document.getElementById('pwd-modal').classList.add('hidden');
+  pwdCallback = null;
+}
+
+function checkPwd() {
+  const input = document.getElementById('pwd-input').value;
+  if (input === ADMIN_PWD) {
+    closePwdModal();
+    if (pwdCallback) pwdCallback();
+  } else {
+    document.getElementById('pwd-err').classList.remove('hidden');
+  }
+}
+
+// ==================== 匹配算法 ====================
+function cosineSimilarity(a, b) {
+  let dot = 0, magA = 0, magB = 0;
+  for (let i = 0; i < a.length; i++) {
+    dot += a[i] * b[i];
+    magA += a[i] * a[i];
+    magB += b[i] * b[i];
+  }
+  if (magA === 0 || magB === 0) return 0;
+  return dot / (Math.sqrt(magA) * Math.sqrt(magB));
+}
+
+function getFeatureVector(answers) {
+  return QUESTIONS.map(q => answers[q.id]);
+}
+
+function computeMatching() {
+  const data = loadData();
+  const persons = Object.keys(data).map(Number);
+  if (persons.length < TOTAL) return null;
+
+  // 构建特征向量
+  const vectors = {};
+  persons.forEach(p => { vectors[p] = getFeatureVector(data[p]); });
+
+  // 计算两两相似度矩阵
+  const simMatrix = {};
+  for (let i = 0; i < persons.length; i++) {
+    for (let j = i + 1; j < persons.length; j++) {
+      const pi = persons[i], pj = persons[j];
+      const key = pi < pj ? `${pi}-${pj}` : `${pj}-${pi}`;
+      simMatrix[key] = cosineSimilarity(vectors[pi], vectors[pj]);
+    }
+  }
+
+  function getSim(a, b) {
+    if (a === b) return 1;
+    const key = a < b ? `${a}-${b}` : `${b}-${a}`;
+    return simMatrix[key] || 0;
+  }
+
+  // 贪心分组
+  let remaining = new Set(persons);
+  let groups = [];
+
+  for (let g = 0; g < 3; g++) {
+    let bestPair = null, bestSim = -1;
+    const arr = [...remaining];
+    for (let i = 0; i < arr.length; i++) {
+      for (let j = i + 1; j < arr.length; j++) {
+        const sim = getSim(arr[i], arr[j]);
+        if (sim > bestSim) { bestSim = sim; bestPair = [arr[i], arr[j]]; }
+      }
+    }
+    let group = new Set(bestPair);
+    remaining.delete(bestPair[0]);
+    remaining.delete(bestPair[1]);
+
+    // 加入最兼容的人直到满员
+    while (group.size < GROUP_SIZE && remaining.size > 0) {
+      let bestPerson = null, bestAvgSim = -Infinity;
+      for (const p of remaining) {
+        let totalSim = 0;
+        for (const m of group) totalSim += getSim(p, m);
+        const avgSim = totalSim / group.size;
+        if (avgSim > bestAvgSim) { bestAvgSim = avgSim; bestPerson = p; }
+      }
+      group.add(bestPerson);
+      remaining.delete(bestPerson);
+    }
+    groups.push([...group]);
+  }
+
+  // 局部优化：尝试交换
+  function groupScore(group) {
+    let total = 0, pairs = 0;
+    for (let i = 0; i < group.length; i++) {
+      for (let j = i + 1; j < group.length; j++) {
+        total += getSim(group[i], group[j]);
+        pairs++;
+      }
+    }
+    return pairs > 0 ? total / pairs : 0;
+  }
+
+  function totalScore(gs) {
+    return gs.reduce((s, g) => s + groupScore(g), 0);
+  }
+
+  let improved = true;
+  let iterations = 0;
+  while (improved && iterations < 100) {
+    improved = false;
+    iterations++;
+    for (let g1 = 0; g1 < 3; g1++) {
+      for (let g2 = g1 + 1; g2 < 3; g2++) {
+        for (let i = 0; i < groups[g1].length; i++) {
+          for (let j = 0; j < groups[g2].length; j++) {
+            const before = totalScore(groups);
+            // 交换
+            const tmp = groups[g1][i];
+            groups[g1][i] = groups[g2][j];
+            groups[g2][j] = tmp;
+            const after = totalScore(groups);
+            if (after > before) {
+              improved = true;
+            } else {
+              // 换回来
+              const tmp2 = groups[g1][i];
+              groups[g1][i] = groups[g2][j];
+              groups[g2][j] = tmp2;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return groups.map((g, i) => ({
+    id: ['A', 'B', 'C'][i],
+    members: g.sort((a, b) => a - b),
+    score: groupScore(g)
+  }));
+}
+
+// ==================== 结果页 ====================
+function showResult() {
+  const data = loadData();
+  const doneCount = Object.keys(data).length;
+  if (doneCount < TOTAL) {
+    alert(`当前仅 ${doneCount} / ${TOTAL} 人完成问卷，需全部完成后才能查看结果。`);
+    return;
+  }
+
+  showPwdModal(() => {
+    const groups = computeMatching();
+    if (!groups) { alert('数据异常，请重置后重试'); return; }
+
+    const colors = { A: '#667eea', B: '#e91e63', C: '#4caf50' };
+
+    let html = '<h2 style="color:#fff;margin-bottom:16px;font-size:22px">分组结果</h2>';
+    html += '<p style="color:rgba(255,255,255,0.8);margin-bottom:20px">以下是根据问卷匹配的最优宿舍分配方案</p>';
+
+    groups.forEach(g => {
+      const scorePct = Math.round(g.score * 100);
+      html += `<div class="result-card dorm-${g.id.toLowerCase()}">
+        <h3>宿舍 ${g.id} <span style="font-size:14px;font-weight:400;color:#888">（匹配度 ${scorePct}%）</span></h3>
+        <div class="score">共4人</div>
+        <div class="member-list">`;
+      g.members.forEach(m => {
+        html += `<div class="member-tag">
+          <span class="dot" style="background:${colors[g.id]}"></span>
+          第 ${m} 位同学
+        </div>`;
+      });
+      html += '</div></div>';
+    });
+
+    html += `<button class="btn btn-outline" onclick="goHome()">返回首页</button>`;
+    document.getElementById('result-content').innerHTML = html;
+    showPage('result-page');
+  });
+}
+
+// ==================== 重置 ====================
+function resetAll() {
+  if (confirm('确定要清除所有问卷数据吗？此操作不可恢复！')) {
+    localStorage.removeItem(STORAGE_KEY);
+    goHome();
+  }
+}
+
+// ==================== 初始化 ====================
+renderHome();
+</script>
+</body>
+</html>

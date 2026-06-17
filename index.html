@@ -272,7 +272,7 @@ body {
   .member-list { grid-template-columns: 1fr; }
 }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- 直接调用Supabase REST API，无需外部CDN -->
 </head>
 <body>
 
@@ -331,53 +331,52 @@ body {
 
 <script>
 // ==================== Supabase 初始化 ====================
-const SUPABASE_URL = 'https://ktlwijaduiqwxelparvu.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0bHdpamFkdWlxd3hlbHBhcnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MDgwNTIsImV4cCI6MjA5NzI4NDA1Mn0.CKuzUMBWptp24hNkgt2BMf6oSbVaPQrcmEdPoCaTdYw';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const API_URL = 'https://ktlwijaduiqwxelparvu.supabase.co/rest/v1/responses';
+const API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0bHdpamFkdWlxd3hlbHBhcnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MDgwNTIsImV4cCI6MjA5NzI4NDA1Mn0.CKuzUMBWptp24hNkgt2BMf6oSbVaPQrcmEdPoCaTdYw';
 
-// ==================== 常量 ====================
-const TOTAL = 12;
-const GROUP_SIZE = 4;
-const ADMIN_PWD = 'admin123';
+function apiHeaders() {
+  return { 'apikey': API_KEY, 'Authorization': 'Bearer ' + API_KEY, 'Content-Type': 'application/json' };
+}
 
-// 问卷题目
-const QUESTIONS = [
-  { id: 'q1', text: '晚上通常几点睡觉？', opts: ['22:00前', '22:00-23:00', '23:00-24:00', '00:00-01:00', '01:00之后'] },
-  { id: 'q2', text: '早上通常几点起床？（没有早课的情况）', opts: ['6:00前', '6:00-7:00', '7:00-8:00', '8:00-9:00', '9:00之后'] },
-  { id: 'q3', text: '你的日常卫生习惯如何？（洗澡频率、衣物换洗、外卖/垃圾处理等）', opts: ['非常爱干净：勤洗澡洗衣、垃圾即时清理', '比较整洁：有规律地打理个人卫生', '一般水平：不算特别勤快但也不会太乱', '比较随性：偶尔堆积衣物或外卖餐盒', '非常随意：不太在意这些生活细节'] },
-  { id: 'q4', text: '室友在房间发出声音（音乐/游戏/电话），你能接受吗？', opts: ['完全不能接受', '不太能接受', '看情况可以接受', '基本能接受', '完全没问题'] },
-  { id: 'q5', text: '你的性格倾向是？（可补充MBTI和兴趣爱好）', opts: ['非常内向，喜欢独处', '偏内向，小圈子社交', '中性，看情况而定', '偏外向，喜欢热闹', '非常外向，社交达人'], extra: [{ id: 'q5_mbti', label: 'MBTI（选填）', placeholder: '如 INTJ、ENFP 等' }, { id: 'q5_hobbies', label: '兴趣爱好（选填）', placeholder: '如 打游戏、篮球、看剧 等' }] },
-  { id: 'q6', text: '空调一般开几度？', opts: ['20°C 以下', '20-22°C', '23-24°C', '25-26°C', '26°C 以上 / 不开空调'] },
-  { id: 'q7', text: '在宿舍你以学习为主吗？', opts: ['几乎全部时间都在学习', '学习为主，偶尔娱乐', '学习和娱乐各半', '娱乐为主，偶尔学习', '基本不学习'] },
-  { id: 'q8', text: '你对室友带访客（朋友/同学）来宿舍的态度？', opts: ['完全不能接受', '偶尔可以，提前打招呼', '无所谓', '比较欢迎', '非常欢迎，热闹就好'] },
-  { id: 'q9', text: '是否愿意全寝室一起购买公用电器（如洗衣机、饮水机等）？', opts: ['完全不愿意', '不太愿意', '看情况/无所谓', '比较愿意', '非常愿意，主动发起'] },
-];
+// 带超时的fetch
+async function apiFetch(url, options = {}, timeoutMs = 8000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    return res;
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
-// ==================== 数据存取（Supabase） ====================
 async function loadData() {
   try {
-    const { data, error } = await supabase.from('responses').select('*');
-    if (error) throw error;
+    const res = await apiFetch(API_URL + '?select=*', { headers: apiHeaders() });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
     const result = {};
     (data || []).forEach(row => { result[row.person_num] = row.answers; });
     return result;
   } catch(e) {
     console.error('加载数据失败:', e);
-    return {};
+    if (e.name === 'AbortError') console.error('请求超时');
+    return { _error: true };
   }
 }
 
 async function saveOneResponse(personNum, answers) {
   try {
-    const { error } = await supabase.from('responses').upsert({
-      person_num: personNum,
-      answers: answers,
-      updated_at: new Date().toISOString()
+    const res = await apiFetch(API_URL, {
+      method: 'POST',
+      headers: { ...apiHeaders(), 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify({ person_num: personNum, answers: answers, updated_at: new Date().toISOString() })
     });
-    if (error) throw error;
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     return true;
   } catch(e) {
     console.error('保存失败:', e);
+    if (e.name === 'AbortError') console.error('请求超时');
     return false;
   }
 }
@@ -393,6 +392,10 @@ async function goHome() { showPage('home-page'); await renderHome(); }
 // ==================== 首页 ====================
 async function renderHome() {
   const data = await loadData();
+  if (data._error) {
+    document.getElementById('person-grid').innerHTML = '<div style="text-align:center;padding:30px;color:#e53935">⚠️ 无法连接服务器，请检查网络后刷新页面</div>';
+    return;
+  }
   const doneCount = Object.keys(data).length;
   const pct = Math.round((doneCount / TOTAL) * 100);
 
@@ -685,7 +688,7 @@ async function showResult() {
 async function resetAll() {
   if (confirm('确定要清除所有问卷数据吗？此操作不可恢复！')) {
     try {
-      await supabase.from('responses').delete().neq('person_num', -1);
+      await fetch(API_URL + '?person_num=gte.0', { method: 'DELETE', headers: apiHeaders() });
       alert('所有数据已清除！');
     } catch(e) {
       alert('清除失败，请检查网络后重试');

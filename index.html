@@ -339,15 +339,11 @@ function apiHeaders() {
 }
 
 // 带超时的fetch
-async function apiFetch(url, options = {}, timeoutMs = 8000) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const res = await fetch(url, { ...options, signal: controller.signal });
-    return res;
-  } finally {
-    clearTimeout(timer);
-  }
+async function apiFetch(url, options = {}, timeoutMs = 6000) {
+  return Promise.race([
+    fetch(url, options),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), timeoutMs))
+  ]);
 }
 
 async function loadData() {
@@ -360,7 +356,6 @@ async function loadData() {
     return result;
   } catch(e) {
     console.error('加载数据失败:', e);
-    if (e.name === 'AbortError') console.error('请求超时');
     return { _error: true };
   }
 }
@@ -376,7 +371,6 @@ async function saveOneResponse(personNum, answers) {
     return true;
   } catch(e) {
     console.error('保存失败:', e);
-    if (e.name === 'AbortError') console.error('请求超时');
     return false;
   }
 }
@@ -698,6 +692,13 @@ async function resetAll() {
 }
 
 // ==================== 初始化 ====================
+// 安全兜底：7秒后无论API是否响应都刷新显示
+setTimeout(() => {
+  const grid = document.getElementById('person-grid');
+  if (grid && grid.querySelector('.loading-overlay')) {
+    grid.innerHTML = '<div style="text-align:center;padding:30px;color:#e53935">连接超时，请检查网络后刷新页面</div>';
+  }
+}, 7000);
 renderHome();
 </script>
 </body>

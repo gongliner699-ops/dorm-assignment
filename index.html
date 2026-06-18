@@ -3,459 +3,251 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>瀹胯垗鍒嗛厤闂嵎绯荤粺</title>
+<title>瀹胯垗鍒嗛厤绯荤粺</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
   color: #333;
 }
-
 .container { max-width: 640px; margin: 0 auto; padding: 20px; }
-
-/* 澶撮儴 */
-.header {
-  text-align: center;
-  padding: 30px 0 20px;
-  color: #fff;
-}
+.header { text-align: center; padding: 30px 0 20px; color: #fff; }
 .header h1 { font-size: 28px; margin-bottom: 6px; }
 .header p { font-size: 14px; opacity: 0.85; }
-
-/* 鍗＄墖 */
-.card {
-  background: #fff;
-  border-radius: 16px;
-  padding: 24px;
-  margin-bottom: 16px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
-}
-
-/* 棣栭〉 - 鍙備笌鑰呯綉鏍?*/
-.participant-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
+.card { background: #fff; border-radius: 16px; padding: 24px; margin-bottom: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.12); }
+.participant-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
 .person-card {
-  aspect-ratio: 1;
-  border-radius: 14px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.25s;
-  border: 2px solid #e0e0e0;
-  background: #fafafa;
-  font-size: 13px;
-  gap: 6px;
+  aspect-ratio: 1; border-radius: 14px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; cursor: pointer; transition: all 0.25s;
+  border: 2px solid #e0e0e0; background: #fafafa; font-size: 13px; gap: 6px;
 }
 .person-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
 .person-card .num { font-size: 24px; font-weight: 700; }
 .person-card .status { font-size: 11px; padding: 2px 8px; border-radius: 10px; }
-
 .person-card.done { border-color: #4caf50; background: #f1f8e9; }
 .person-card.done .status { background: #4caf50; color: #fff; }
 .person-card.pending .status { background: #e0e0e0; color: #888; }
-
-.progress-bar-wrap {
-  background: #e0e0e0;
-  border-radius: 8px;
-  height: 8px;
-  margin-bottom: 20px;
-  overflow: hidden;
-}
-.progress-bar {
-  height: 100%;
-  background: linear-gradient(90deg, #667eea, #764ba2);
-  border-radius: 8px;
-  transition: width 0.4s;
-}
+.progress-bar-wrap { background: #e0e0e0; border-radius: 8px; height: 8px; margin-bottom: 20px; overflow: hidden; }
+.progress-bar { height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 8px; transition: width 0.4s; }
 .progress-text { text-align: center; font-size: 14px; color: #666; margin-bottom: 16px; }
-
-/* 鎸夐挳 */
 .btn {
-  display: block;
-  width: 100%;
-  padding: 14px;
-  border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
+  display: block; width: 100%; padding: 14px; border: none; border-radius: 12px;
+  font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s;
 }
 .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
 .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-.btn-outline {
-  background: #fff;
-  color: #667eea;
-  border: 2px solid #667eea;
-  margin-bottom: 10px;
-}
+.btn-outline { background: #fff; color: #667eea; border: 2px solid #667eea; margin-bottom: 10px; }
 .btn-outline:hover { background: #f5f0ff; }
 .btn-danger { background: #fff; color: #e53935; border: 2px solid #e53935; font-size: 14px; padding: 10px; }
 .btn-danger:hover { background: #ffebee; }
 .btn-sm { width: auto; display: inline-block; padding: 8px 18px; font-size: 14px; }
-
-/* 鍔犺浇鐘舵€?*/
-.loading-overlay {
-  text-align: center;
-  padding: 40px;
-  color: #888;
-  font-size: 14px;
-}
-.loading-spinner {
-  display: inline-block;
-  width: 24px; height: 24px;
-  border: 3px solid #e0e0e0;
-  border-top-color: #667eea;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin-right: 10px;
-  vertical-align: middle;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* 闂嵎椤?*/
-.quiz-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-}
+.quiz-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
 .quiz-header .person-badge {
-  width: 48px; height: 48px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  font-weight: 700;
+  width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700;
 }
 .quiz-header .info { flex: 1; }
 .quiz-header .info .name { font-size: 18px; font-weight: 600; color: #fff; }
 .quiz-header .info .hint { font-size: 13px; color: rgba(255,255,255,0.8); }
-
-.question-block {
-  background: #fff;
-  border-radius: 14px;
-  padding: 20px;
-  margin-bottom: 12px;
-}
+.question-block { background: #fff; border-radius: 14px; padding: 20px; margin-bottom: 12px; }
 .question-block .q-num {
-  display: inline-block;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: #fff;
-  width: 26px; height: 26px;
-  border-radius: 50%;
-  text-align: center;
-  line-height: 26px;
-  font-size: 13px;
-  font-weight: 700;
-  margin-bottom: 8px;
+  display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff;
+  width: 26px; height: 26px; border-radius: 50%; text-align: center; line-height: 26px;
+  font-size: 13px; font-weight: 700; margin-bottom: 8px;
 }
 .question-block .q-title { font-size: 16px; font-weight: 600; margin-bottom: 12px; }
-
 .options { display: flex; flex-direction: column; gap: 8px; }
 .option {
-  padding: 12px 16px;
-  border: 2px solid #e8e8e8;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 14px;
+  padding: 12px 16px; border: 2px solid #e8e8e8; border-radius: 10px;
+  cursor: pointer; transition: all 0.2s; font-size: 14px;
 }
 .option:hover { border-color: #b39ddb; background: #faf8ff; }
 .option.selected { border-color: #667eea; background: #f0edff; font-weight: 500; }
-
-/* 棰濆琛ュ厖瀛楁锛圡BTI銆佸叴瓒ｇ埍濂界瓑锛?*/
-.extra-field {
-  margin-top: 10px;
-}
-.extra-field label {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  color: #888;
-  margin-bottom: 4px;
-}
+.extra-field { margin-top: 10px; }
+.extra-field label { display: block; font-size: 13px; font-weight: 600; color: #888; margin-bottom: 4px; }
 .extra-field input {
-  width: 100%;
-  padding: 10px 14px;
-  border: 2px solid #e8e8e8;
-  border-radius: 10px;
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.2s;
+  width: 100%; padding: 10px 14px; border: 2px solid #e8e8e8;
+  border-radius: 10px; font-size: 14px; outline: none; transition: border-color 0.2s;
 }
 .extra-field input:focus { border-color: #667eea; }
-
-/* 缁撴灉椤?*/
 .result-card {
-  background: #fff;
-  border-radius: 16px;
-  padding: 24px;
-  margin-bottom: 16px;
-  border-left: 5px solid transparent;
+  background: #fff; border-radius: 16px; padding: 24px; margin-bottom: 16px; border-left: 5px solid transparent;
 }
 .result-card.dorm-a { border-left-color: #667eea; }
 .result-card.dorm-b { border-left-color: #e91e63; }
 .result-card.dorm-c { border-left-color: #4caf50; }
 .result-card h3 { font-size: 18px; margin-bottom: 4px; }
 .result-card .score { font-size: 13px; color: #888; margin-bottom: 12px; }
-
 .member-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
 .member-tag {
-  padding: 10px 12px;
-  border-radius: 10px;
-  font-size: 14px;
-  background: #f5f5f5;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  padding: 10px 12px; border-radius: 10px; font-size: 14px; background: #f5f5f5;
+  display: flex; align-items: center; gap: 8px;
 }
-.member-tag .dot {
-  width: 10px; height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-/* 寮圭獥 */
+.member-tag .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center; z-index: 100;
 }
-.modal {
-  background: #fff;
-  border-radius: 16px;
-  padding: 30px;
-  width: 90%;
-  max-width: 380px;
+.modal { background: #fff; border-radius: 16px; padding: 30px; width: 90%; max-width: 400px; }
+.modal h3 { margin-bottom: 12px; font-size: 18px; }
+.modal textarea {
+  width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px;
+  font-size: 14px; margin-bottom: 12px; resize: vertical; outline: none; font-family: monospace;
 }
-.modal h3 { margin-bottom: 16px; font-size: 18px; }
+.modal textarea:focus { border-color: #667eea; }
 .modal input {
-  width: 100%;
-  padding: 12px 16px;
-  border: 2px solid #e0e0e0;
-  border-radius: 10px;
-  font-size: 16px;
-  margin-bottom: 16px;
-  outline: none;
+  width: 100%; padding: 12px 16px; border: 2px solid #e0e0e0;
+  border-radius: 10px; font-size: 16px; margin-bottom: 12px; outline: none;
 }
 .modal input:focus { border-color: #667eea; }
 .modal .err { color: #e53935; font-size: 13px; margin-bottom: 10px; }
 .modal-btns { display: flex; gap: 10px; }
 .modal-btns .btn { flex: 1; }
-
-/* 宸ュ叿 */
-.top-bar { display: flex; justify-content: space-between; margin-bottom: 16px; }
-.top-bar .btn-sm { width: auto; }
-
 .hidden { display: none !important; }
-
+.copy-box {
+  background: #f5f5f5; padding: 14px; border-radius: 10px; word-break: break-all;
+  font-family: monospace; font-size: 13px; margin: 10px 0; color: #555; max-height: 120px; overflow-y: auto;
+}
+.tag { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+.tag-ok { background: #e8f5e9; color: #2e7d32; }
+.tag-no { background: #fff3e0; color: #e65100; }
 @media (max-width: 400px) {
   .participant-grid { grid-template-columns: repeat(3, 1fr); }
   .member-list { grid-template-columns: 1fr; }
 }
 </style>
-<!-- 鐩存帴璋冪敤Supabase REST API锛屾棤闇€澶栭儴CDN -->
 </head>
 <body>
-
 <div class="container">
   <div class="header">
     <h1>瀹胯垗鍒嗛厤绯荤粺</h1>
-    <p>12浜?路 3涓鑸?路 鎵惧埌鏈€鍚堟媿鐨勫鍙?/p>
+    <p>12浜?3涓鑸?鎵惧埌鏈€鍚堟媿鐨勫鍙?/p>
   </div>
 
-  <!-- ========== 棣栭〉 ========== -->
+  <!-- 棣栭〉 -->
   <div id="home-page">
     <div class="card">
-      <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar" style="width:0%"></div></div>
-      <p class="progress-text"><span id="done-count">0</span> / 12 浜哄凡瀹屾垚</p>
-      <div class="participant-grid" id="person-grid">
-        <div class="loading-overlay"><span class="loading-spinner"></span>鍔犺浇涓?..</div>
-      </div>
-      <button class="btn btn-primary" onclick="showResult()">鏌ョ湅鍒嗙粍缁撴灉</button>
-      <button class="btn btn-outline" style="margin-top:10px" onclick="resetAll()">閲嶇疆鎵€鏈夋暟鎹?/button>
+      <p style="text-align:center;margin-bottom:16px;font-size:14px;color:#888">
+        姣忎汉鐢ㄨ嚜宸辫澶囨墦寮€缃戠珯锛屽～鍐欏悗鑾峰緱<b>鍙ｄ护</b>锛屽彂缁欐敹闆嗚€呯粺涓€璁＄畻
+      </p>
+      <div class="participant-grid" id="person-grid"></div>
+      <button class="btn btn-primary" onclick="openCollector()">鏀堕泦鍙ｄ护 璁＄畻鍒嗙粍</button>
+      <button class="btn btn-outline" style="margin-top:10px" onclick="if(confirm('娓呴櫎鎵€鏈夋暟鎹紵')){localStorage.clear();renderHome();}">娓呴櫎鏈湴缂撳瓨</button>
     </div>
   </div>
 
-  <!-- ========== 闂嵎椤?========== -->
+  <!-- 闂嵎椤?-->
   <div id="quiz-page" class="hidden">
     <button class="btn-sm btn-outline" onclick="goHome()" style="margin-bottom:12px">鈫?杩斿洖鍒楄〃</button>
     <div class="quiz-header">
       <div class="person-badge" id="quiz-badge">1</div>
-      <div class="info">
-        <div class="name" id="quiz-name">绗?1 浣嶅悓瀛?/div>
-        <div class="hint" id="quiz-hint">璇峰洖绛斾互涓嬮棶棰?/div>
-      </div>
+      <div class="info"><div class="name" id="quiz-name"></div><div class="hint" id="quiz-hint"></div></div>
     </div>
     <div id="questions-container"></div>
     <button class="btn btn-primary" id="submit-btn" onclick="submitQuiz()" style="margin-top:16px">鎻愪氦闂嵎</button>
   </div>
 
-  <!-- ========== 缁撴灉椤?========== -->
+  <!-- 缁撴灉椤?-->
   <div id="result-page" class="hidden">
-    <button class="btn-sm btn-outline" onclick="goHome()" style="margin-bottom:12px">鈫?杩斿洖鍒楄〃</button>
+    <button class="btn-sm btn-outline" onclick="goHome()" style="margin-bottom:12px">鈫?杩斿洖</button>
     <div id="result-content"></div>
   </div>
 </div>
 
-<!-- 瀵嗙爜寮圭獥 -->
-<div id="pwd-modal" class="modal-overlay hidden">
+<!-- 鍙ｄ护寮圭獥锛堟彁浜ゅ悗鏄剧ず锛?-->
+<div id="code-modal" class="modal-overlay hidden">
   <div class="modal">
-    <h3>璇疯緭鍏ョ鐞嗗瘑鐮?/h3>
-    <input type="password" id="pwd-input" placeholder="杈撳叆瀵嗙爜" onkeydown="if(event.key==='Enter')checkPwd()">
-    <p class="err hidden" id="pwd-err">瀵嗙爜閿欒锛岃閲嶈瘯</p>
+    <h3>浣犵殑鍙ｄ护</h3>
+    <p style="font-size:14px;color:#666;margin-bottom:10px">
+      璇?b>澶嶅埗浠ヤ笅鍙ｄ护</b>鍙戦€佺粰鏀堕泦鑰呫€傛瘡浜轰竴浠斤紝涓嶈鎼炴贩缂栧彿锛?    </p>
+    <div class="copy-box" id="code-text"></div>
+    <button class="btn btn-primary" onclick="copyCode()" style="margin-bottom:8px">澶嶅埗鍙ｄ护</button>
+    <button class="btn btn-outline" onclick="closeCodeModal()">鍏抽棴</button>
+  </div>
+</div>
+
+<!-- 鏀堕泦鑰呭脊绐?-->
+<div id="collector-modal" class="modal-overlay hidden">
+  <div class="modal" style="max-width:500px">
+    <h3>鏀堕泦鍙ｄ护</h3>
+    <p style="font-size:13px;color:#666;margin-bottom:10px">
+      璇锋敹闆嗗叏閮?2浜虹殑鍙ｄ护锛屾瘡琛岃创涓€涓紝鐒跺悗鐐瑰嚮璁＄畻銆?    </p>
+    <textarea id="codes-input" rows="8" placeholder="姣忚绮樿创涓€涓汉鐨勫彛浠?.."></textarea>
+    <p style="font-size:12px;color:#888;margin-bottom:10px">
+      宸茶瘑鍒? <b><span id="parsed-count">0</span> / 12</b> 浜?    </p>
+    <input type="password" id="pwd-input" placeholder="绠＄悊瀵嗙爜">
+    <p class="err hidden" id="pwd-err">瀵嗙爜閿欒</p>
     <div class="modal-btns">
-      <button class="btn btn-outline" onclick="closePwdModal()">鍙栨秷</button>
-      <button class="btn btn-primary" onclick="checkPwd()">纭</button>
+      <button class="btn btn-outline" onclick="closeCollector()">鍙栨秷</button>
+      <button class="btn btn-primary" onclick="doCompute()">璁＄畻鍒嗙粍</button>
     </div>
   </div>
 </div>
 
 <script>
-// ==================== GitHub API 鏁版嵁灞?====================
-const GH_TOKEN = 'ghp_yCL7R4MjY' + '4iLXS77gBCtPbv5gsMIVv2wDgfe';
-const GH_API = 'https://api.github.com/repos/gongliner699-ops/dorm-assignment/contents/data.json';
+// ==================== 甯搁噺 ====================
+var TOTAL = 12;
+var GROUP_SIZE = 4;
+var ADMIN_PWD = 'admin123';
 
-function ghHeaders() {
-  return { 'Authorization': 'Bearer ' + GH_TOKEN, 'Accept': 'application/vnd.github.v3+json' };
-}
-
-// 甯﹁秴鏃剁殑fetch
-async function apiFetch(url, options = {}, timeoutMs = 8000) {
-  return Promise.race([
-    fetch(url, options),
-    new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), timeoutMs))
-  ]);
-}
-
-async function loadData() {
-  try {
-    const res = await apiFetch(GH_API, { headers: ghHeaders() });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const file = await res.json();
-    return JSON.parse(atob(file.content));
-  } catch(e) {
-    console.error('鍔犺浇鏁版嵁澶辫触:', e);
-    return { _error: true };
-  }
-}
-
-async function saveAllData(data) {
-  try {
-    // 鍏堣幏鍙栧綋鍓嶆枃浠秙ha
-    const getRes = await apiFetch(GH_API, { headers: ghHeaders() });
-    if (!getRes.ok) throw new Error('HTTP ' + getRes.status);
-    const file = await getRes.json();
-
-    const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
-    const putRes = await apiFetch(GH_API, {
-      method: 'PUT',
-      headers: { ...ghHeaders(), 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: '鏇存柊闂嵎鏁版嵁', content: content, sha: file.sha })
-    });
-    if (!putRes.ok) throw new Error('HTTP ' + putRes.status);
-    return true;
-  } catch(e) {
-    console.error('淇濆瓨澶辫触:', e);
-    return false;
-  }
-}
-
-async function saveOneResponse(personNum, answers) {
-  const data = await loadData();
-  if (data._error) return false;
-  data[personNum] = answers;
-  return await saveAllData(data);
-}
+var QUESTIONS = [
+  { id: 'q1', text: '鏅氫笂閫氬父鍑犵偣鐫¤锛?, opts: ['22:00鍓?, '22:00-23:00', '23:00-24:00', '00:00-01:00', '01:00涔嬪悗'] },
+  { id: 'q2', text: '鏃╀笂閫氬父鍑犵偣璧峰簥锛燂紙娌℃湁鏃╄鐨勬儏鍐碉級', opts: ['6:00鍓?, '6:00-7:00', '7:00-8:00', '8:00-9:00', '9:00涔嬪悗'] },
+  { id: 'q3', text: '浣犵殑鏃ュ父鍗敓涔犳儻濡備綍锛燂紙娲楁尽棰戠巼銆佽。鐗╂崲娲椼€佸鍗?鍨冨溇澶勭悊绛夛級', opts: ['闈炲父鐖卞共鍑€锛氬嫟娲楁尽娲楄。銆佸瀮鍦惧嵆鏃舵竻鐞?, '姣旇緝鏁存磥锛氭湁瑙勫緥鍦版墦鐞嗕釜浜哄崼鐢?, '涓€鑸按骞筹細涓嶇畻鐗瑰埆鍕ゅ揩浣嗕篃涓嶄細澶贡', '姣旇緝闅忔€э細鍋跺皵鍫嗙Н琛ｇ墿鎴栧鍗栭鐩?, '闈炲父闅忔剰锛氫笉澶湪鎰忚繖浜涚敓娲荤粏鑺?] },
+  { id: 'q4', text: '瀹ゅ弸鍦ㄦ埧闂村彂鍑哄０闊筹紙闊充箰/娓告垙/鐢佃瘽锛夛紝浣犺兘鎺ュ彈鍚楋紵', opts: ['瀹屽叏涓嶈兘鎺ュ彈', '涓嶅お鑳芥帴鍙?, '鐪嬫儏鍐靛彲浠ユ帴鍙?, '鍩烘湰鑳芥帴鍙?, '瀹屽叏娌￠棶棰?] },
+  { id: 'q5', text: '浣犵殑鎬ф牸鍊惧悜鏄紵锛堝彲琛ュ厖MBTI鍜屽叴瓒ｇ埍濂斤級', opts: ['闈炲父鍐呭悜锛屽枩娆㈢嫭澶?, '鍋忓唴鍚戯紝灏忓湀瀛愮ぞ浜?, '涓€э紝鐪嬫儏鍐佃€屽畾', '鍋忓鍚戯紝鍠滄鐑椆', '闈炲父澶栧悜锛岀ぞ浜よ揪浜?], extra: [{ id: 'q5_mbti', label: 'MBTI锛堥€夊～锛?, placeholder: '濡?INTJ銆丒NFP 绛? }, { id: 'q5_hobbies', label: '鍏磋叮鐖卞ソ锛堥€夊～锛?, placeholder: '濡?鎵撴父鎴忋€佺鐞冦€佺湅鍓?绛? }] },
+  { id: 'q6', text: '绌鸿皟涓€鑸紑鍑犲害锛?, opts: ['20C 浠ヤ笅', '20-22C', '23-24C', '25-26C', '26C 浠ヤ笂 / 涓嶅紑绌鸿皟'] },
+  { id: 'q7', text: '鍦ㄥ鑸嶄綘浠ュ涔犱负涓诲悧锛?, opts: ['鍑犱箮鍏ㄩ儴鏃堕棿閮藉湪瀛︿範', '瀛︿範涓轰富锛屽伓灏斿ū涔?, '瀛︿範鍜屽ū涔愬悇鍗?, '濞变箰涓轰富锛屽伓灏斿涔?, '鍩烘湰涓嶅涔?] },
+  { id: 'q8', text: '浣犲瀹ゅ弸甯﹁瀹紙鏈嬪弸/鍚屽锛夋潵瀹胯垗鐨勬€佸害锛?, opts: ['瀹屽叏涓嶈兘鎺ュ彈', '鍋跺皵鍙互锛屾彁鍓嶆墦鎷涘懠', '鏃犳墍璋?, '姣旇緝娆㈣繋', '闈炲父娆㈣繋锛岀儹闂瑰氨濂?] },
+  { id: 'q9', text: '鏄惁鎰挎剰鍏ㄥ瘽瀹や竴璧疯喘涔板叕鐢ㄧ數鍣紙濡傛礂琛ｆ満銆侀ギ姘存満绛夛級锛?, opts: ['瀹屽叏涓嶆効鎰?, '涓嶅お鎰挎剰', '鐪嬫儏鍐?鏃犳墍璋?, '姣旇緝鎰挎剰', '闈炲父鎰挎剰锛屼富鍔ㄥ彂璧?] }
+];
 
 // ==================== 椤甸潰瀵艰埅 ====================
 function showPage(id) {
-  document.querySelectorAll('#home-page, #quiz-page, #result-page').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('#home-page, #quiz-page, #result-page').forEach(function(el) { el.classList.add('hidden'); });
   document.getElementById(id).classList.remove('hidden');
 }
-
-async function goHome() { showPage('home-page'); await renderHome(); }
+function goHome() { showPage('home-page'); renderHome(); }
 
 // ==================== 棣栭〉 ====================
-async function renderHome() {
-  const data = await loadData();
-  if (data._error) {
-    document.getElementById('person-grid').innerHTML = '<div style="text-align:center;padding:30px;color:#e53935">鈿狅笍 鏃犳硶杩炴帴鏈嶅姟鍣紝璇锋鏌ョ綉缁滃悗鍒锋柊椤甸潰</div>';
-    return;
-  }
-  const doneCount = Object.keys(data).length;
-  const pct = Math.round((doneCount / TOTAL) * 100);
-
-  document.getElementById('progress-bar').style.width = pct + '%';
-  document.getElementById('done-count').textContent = doneCount;
-
-  let html = '';
-  for (let i = 1; i <= TOTAL; i++) {
-    const isDone = data[i] !== undefined;
-    const cls = isDone ? 'done' : 'pending';
-    const statusText = isDone ? '宸插畬鎴? : '寰呭～鍐?;
-    html += `<div class="person-card ${cls}" onclick="startQuiz(${i})">
-      <span class="num">${i}</span>
-      <span class="status">${statusText}</span>
-    </div>`;
+function renderHome() {
+  var html = '';
+  for (var i = 1; i <= TOTAL; i++) {
+    html += '<div class="person-card pending" onclick="startQuiz(' + i + ')"><span class="num">' + i + '</span><span class="status">鐐瑰嚮濉啓</span></div>';
   }
   document.getElementById('person-grid').innerHTML = html;
 }
 
 // ==================== 闂嵎椤?====================
-let currentPerson = null;
-let currentAnswers = {};
+var currentPerson = null;
+var currentAnswers = {};
 
 function escapeHtml(str) {
-  const div = document.createElement('div');
+  var div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
 }
 
-async function startQuiz(personNum) {
+function startQuiz(personNum) {
   currentPerson = personNum;
-  const data = await loadData();
-  currentAnswers = data[personNum] ? { ...data[personNum] } : {};
-
+  currentAnswers = {};
   document.getElementById('quiz-badge').textContent = personNum;
-  document.getElementById('quiz-name').textContent = `绗?${personNum} 浣嶅悓瀛;
-  const hint = data[personNum] ? '宸叉彁浜わ紝鍙慨鏀? : '璇峰洖绛斾互涓嬮棶棰?;
-  document.getElementById('quiz-hint').textContent = hint;
+  document.getElementById('quiz-name').textContent = '绗?' + personNum + ' 浣嶅悓瀛?;
+  document.getElementById('quiz-hint').textContent = '璇峰洖绛斾互涓嬮棶棰?;
 
-  let html = '';
-  QUESTIONS.forEach((q, idx) => {
-    html += `<div class="question-block">
-      <span class="q-num">${idx + 1}</span>
-      <div class="q-title">${q.text}</div>
-      <div class="options">`;
-    q.opts.forEach((opt, optIdx) => {
-      const score = optIdx + 1;
-      const sel = currentAnswers[q.id] === score ? ' selected' : '';
-      html += `<div class="option${sel}" onclick="selectOption(this, '${q.id}', ${score})">${opt}</div>`;
+  var html = '';
+  QUESTIONS.forEach(function(q, idx) {
+    html += '<div class="question-block"><span class="q-num">' + (idx + 1) + '</span><div class="q-title">' + q.text + '</div><div class="options">';
+    q.opts.forEach(function(opt, optIdx) {
+      var score = optIdx + 1;
+      html += '<div class="option" onclick="selectOption(this,\'' + q.id + '\',' + score + ')">' + opt + '</div>';
     });
     html += '</div>';
-    // 棰濆琛ュ厖瀛楁锛圡BTI銆佸叴瓒ｇ埍濂界瓑锛屼笉褰卞搷鍖归厤绠楁硶锛?    if (q.extra) {
-      q.extra.forEach(e => {
-        const val = currentAnswers[e.id] || '';
-        html += `<div class="extra-field"><label>${e.label}</label><input type="text" placeholder="${e.placeholder}" value="${escapeHtml(val)}" onchange="saveExtra('${e.id}', this.value)"></div>`;
+    if (q.extra) {
+      q.extra.forEach(function(e) {
+        html += '<div class="extra-field"><label>' + e.label + '</label><input type="text" placeholder="' + e.placeholder + '" onchange="saveExtra(\'' + e.id + '\', this.value)"></div>';
       });
     }
     html += '</div>';
@@ -465,7 +257,7 @@ async function startQuiz(personNum) {
 }
 
 function selectOption(el, qid, score) {
-  el.parentElement.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  el.parentElement.querySelectorAll('.option').forEach(function(o) { o.classList.remove('selected'); });
   el.classList.add('selected');
   currentAnswers[qid] = score;
 }
@@ -474,60 +266,98 @@ function saveExtra(id, value) {
   currentAnswers[id] = value;
 }
 
-async function submitQuiz() {
-  // 妫€鏌ュ繀绛旈鏄惁鍏ㄩ儴鍥炵瓟锛堜粎涓婚棶棰榠d锛岃烦杩噀xtra瀛楁锛?  const mainIds = QUESTIONS.map(q => q.id);
-  if (mainIds.some(id => !currentAnswers[id])) {
+function submitQuiz() {
+  var mainIds = QUESTIONS.map(function(q) { return q.id; });
+  if (mainIds.some(function(id) { return !currentAnswers[id]; })) {
     alert('璇峰洖绛旀墍鏈夐棶棰樺悗鍐嶆彁浜わ紒');
     return;
   }
+  // 鐢熸垚鍙ｄ护
+  var payload = { p: currentPerson, a: currentAnswers };
+  var code = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  document.getElementById('code-text').textContent = code;
+  document.getElementById('code-modal').classList.remove('hidden');
+}
 
-  const btn = document.getElementById('submit-btn');
-  btn.disabled = true;
-  btn.textContent = '鎻愪氦涓?..';
-
-  const ok = await saveOneResponse(currentPerson, { ...currentAnswers });
-
-  btn.disabled = false;
-  btn.textContent = '鎻愪氦闂嵎';
-
-  if (ok) {
-    alert(`绗?${currentPerson} 浣嶅悓瀛﹂棶鍗峰凡鎻愪氦锛乣);
-    goHome();
+function copyCode() {
+  var txt = document.getElementById('code-text').textContent;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(txt).then(function() { alert('宸插鍒讹紒璇峰彂閫佺粰鏀堕泦鑰呫€?); });
   } else {
-    alert('鎻愪氦澶辫触锛岃妫€鏌ョ綉缁滃悗閲嶈瘯');
+    // fallback
+    var ta = document.createElement('textarea');
+    ta.value = txt; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    alert('宸插鍒讹紒璇峰彂閫佺粰鏀堕泦鑰呫€?);
   }
 }
 
-// ==================== 瀵嗙爜寮圭獥 ====================
-let pwdCallback = null;
+function closeCodeModal() {
+  document.getElementById('code-modal').classList.add('hidden');
+  goHome();
+}
 
-function showPwdModal(callback) {
-  pwdCallback = callback;
-  document.getElementById('pwd-modal').classList.remove('hidden');
+// ==================== 鏀堕泦鑰?====================
+function openCollector() {
+  document.getElementById('codes-input').value = '';
+  document.getElementById('parsed-count').textContent = '0';
   document.getElementById('pwd-input').value = '';
   document.getElementById('pwd-err').classList.add('hidden');
-  setTimeout(() => document.getElementById('pwd-input').focus(), 100);
+  document.getElementById('collector-modal').classList.remove('hidden');
+
+  // 瀹炴椂鏄剧ず瑙ｆ瀽鏁伴噺
+  document.getElementById('codes-input').oninput = function() {
+    var parsed = parseCodes();
+    document.getElementById('parsed-count').textContent = Object.keys(parsed).length;
+  };
 }
 
-function closePwdModal() {
-  document.getElementById('pwd-modal').classList.add('hidden');
-  pwdCallback = null;
+function closeCollector() {
+  document.getElementById('collector-modal').classList.add('hidden');
 }
 
-function checkPwd() {
-  const input = document.getElementById('pwd-input').value;
-  if (input === ADMIN_PWD) {
-    closePwdModal();
-    if (pwdCallback) pwdCallback();
-  } else {
+function parseCodes() {
+  var text = document.getElementById('codes-input').value.trim();
+  if (!text) return {};
+  var lines = text.split(/[\n\r]+/).filter(function(l) { return l.trim(); });
+  var result = {};
+  lines.forEach(function(line) {
+    try {
+      var payload = JSON.parse(decodeURIComponent(escape(atob(line.trim()))));
+      if (payload.p && payload.a) {
+        result[payload.p] = payload.a;
+      }
+    } catch(e) { /* skip invalid */ }
+  });
+  return result;
+}
+
+function doCompute() {
+  var pwd = document.getElementById('pwd-input').value;
+  if (pwd !== ADMIN_PWD) {
     document.getElementById('pwd-err').classList.remove('hidden');
+    return;
   }
+  document.getElementById('pwd-err').classList.add('hidden');
+
+  var data = parseCodes();
+  var count = Object.keys(data).length;
+  if (count < TOTAL) {
+    alert('鍙瘑鍒埌 ' + count + ' / ' + TOTAL + ' 浜猴紝杩橀渶瑕?' + (TOTAL - count) + ' 浜虹殑鍙ｄ护锛?);
+    return;
+  }
+
+  var groups = computeMatching(data);
+  if (!groups) { alert('鏁版嵁寮傚父锛岃閲嶈瘯'); return; }
+
+  closeCollector();
+  showResults(groups);
 }
 
 // ==================== 鍖归厤绠楁硶 ====================
 function cosineSimilarity(a, b) {
-  let dot = 0, magA = 0, magB = 0;
-  for (let i = 0; i < a.length; i++) {
+  var dot = 0, magA = 0, magB = 0;
+  for (var i = 0; i < a.length; i++) {
     dot += a[i] * b[i];
     magA += a[i] * a[i];
     magB += b[i] * b[i];
@@ -537,69 +367,65 @@ function cosineSimilarity(a, b) {
 }
 
 function getFeatureVector(answers) {
-  return QUESTIONS.map(q => answers[q.id]);
+  return QUESTIONS.map(function(q) { return answers[q.id]; });
 }
 
 function computeMatching(data) {
-  const persons = Object.keys(data).map(Number);
+  var persons = Object.keys(data).map(Number);
   if (persons.length < TOTAL) return null;
 
-  // 鏋勫缓鐗瑰緛鍚戦噺
-  const vectors = {};
-  persons.forEach(p => { vectors[p] = getFeatureVector(data[p]); });
+  var vectors = {};
+  persons.forEach(function(p) { vectors[p] = getFeatureVector(data[p]); });
 
-  // 璁＄畻涓や袱鐩镐技搴︾煩闃?  const simMatrix = {};
-  for (let i = 0; i < persons.length; i++) {
-    for (let j = i + 1; j < persons.length; j++) {
-      const pi = persons[i], pj = persons[j];
-      const key = pi < pj ? `${pi}-${pj}` : `${pj}-${pi}`;
+  var simMatrix = {};
+  for (var i = 0; i < persons.length; i++) {
+    for (var j = i + 1; j < persons.length; j++) {
+      var pi = persons[i], pj = persons[j];
+      var key = pi < pj ? pi + '-' + pj : pj + '-' + pi;
       simMatrix[key] = cosineSimilarity(vectors[pi], vectors[pj]);
     }
   }
 
   function getSim(a, b) {
     if (a === b) return 1;
-    const key = a < b ? `${a}-${b}` : `${b}-${a}`;
+    var key = a < b ? a + '-' + b : b + '-' + a;
     return simMatrix[key] || 0;
   }
 
-  // 璐績鍒嗙粍
-  let remaining = new Set(persons);
-  let groups = [];
+  var remaining = new Set(persons);
+  var groups = [];
 
-  for (let g = 0; g < 3; g++) {
-    let bestPair = null, bestSim = -1;
-    const arr = [...remaining];
-    for (let i = 0; i < arr.length; i++) {
-      for (let j = i + 1; j < arr.length; j++) {
-        const sim = getSim(arr[i], arr[j]);
+  for (var g = 0; g < 3; g++) {
+    var bestPair = null, bestSim = -1;
+    var arr = Array.from(remaining);
+    for (var i = 0; i < arr.length; i++) {
+      for (var j = i + 1; j < arr.length; j++) {
+        var sim = getSim(arr[i], arr[j]);
         if (sim > bestSim) { bestSim = sim; bestPair = [arr[i], arr[j]]; }
       }
     }
-    let group = new Set(bestPair);
+    var group = new Set(bestPair);
     remaining.delete(bestPair[0]);
     remaining.delete(bestPair[1]);
 
-    // 鍔犲叆鏈€鍏煎鐨勪汉鐩村埌婊″憳
     while (group.size < GROUP_SIZE && remaining.size > 0) {
-      let bestPerson = null, bestAvgSim = -Infinity;
-      for (const p of remaining) {
-        let totalSim = 0;
-        for (const m of group) totalSim += getSim(p, m);
-        const avgSim = totalSim / group.size;
+      var bestPerson = null, bestAvgSim = -Infinity;
+      remaining.forEach(function(p) {
+        var totalSim = 0;
+        group.forEach(function(m) { totalSim += getSim(p, m); });
+        var avgSim = totalSim / group.size;
         if (avgSim > bestAvgSim) { bestAvgSim = avgSim; bestPerson = p; }
-      }
+      });
       group.add(bestPerson);
       remaining.delete(bestPerson);
     }
-    groups.push([...group]);
+    groups.push(Array.from(group));
   }
 
-  // 灞€閮ㄤ紭鍖栵細灏濊瘯浜ゆ崲
   function groupScore(group) {
-    let total = 0, pairs = 0;
-    for (let i = 0; i < group.length; i++) {
-      for (let j = i + 1; j < group.length; j++) {
+    var total = 0, pairs = 0;
+    for (var i = 0; i < group.length; i++) {
+      for (var j = i + 1; j < group.length; j++) {
         total += getSim(group[i], group[j]);
         pairs++;
       }
@@ -607,103 +433,53 @@ function computeMatching(data) {
     return pairs > 0 ? total / pairs : 0;
   }
 
-  function totalScore(gs) {
-    return gs.reduce((s, g) => s + groupScore(g), 0);
-  }
+  function totalScore(gs) { return gs.reduce(function(s, g) { return s + groupScore(g); }, 0); }
 
-  let improved = true;
-  let iterations = 0;
+  var improved = true, iterations = 0;
   while (improved && iterations < 100) {
-    improved = false;
-    iterations++;
-    for (let g1 = 0; g1 < 3; g1++) {
-      for (let g2 = g1 + 1; g2 < 3; g2++) {
-        for (let i = 0; i < groups[g1].length; i++) {
-          for (let j = 0; j < groups[g2].length; j++) {
-            const before = totalScore(groups);
-            // 浜ゆ崲
-            const tmp = groups[g1][i];
-            groups[g1][i] = groups[g2][j];
-            groups[g2][j] = tmp;
-            const after = totalScore(groups);
-            if (after > before) {
-              improved = true;
-            } else {
-              // 鎹㈠洖鏉?              const tmp2 = groups[g1][i];
-              groups[g1][i] = groups[g2][j];
-              groups[g2][j] = tmp2;
-            }
+    improved = false; iterations++;
+    for (var g1 = 0; g1 < 3; g1++) {
+      for (var g2 = g1 + 1; g2 < 3; g2++) {
+        for (var i = 0; i < groups[g1].length; i++) {
+          for (var j = 0; j < groups[g2].length; j++) {
+            var before = totalScore(groups);
+            var tmp = groups[g1][i]; groups[g1][i] = groups[g2][j]; groups[g2][j] = tmp;
+            if (totalScore(groups) > before) { improved = true; }
+            else { var tmp2 = groups[g1][i]; groups[g1][i] = groups[g2][j]; groups[g2][j] = tmp2; }
           }
         }
       }
     }
   }
 
-  return groups.map((g, i) => ({
+  return groups.map(function(g, i) { return {
     id: ['A', 'B', 'C'][i],
-    members: g.sort((a, b) => a - b),
+    members: g.sort(function(a, b) { return a - b; }),
     score: groupScore(g)
-  }));
+  };});
 }
 
-// ==================== 缁撴灉椤?====================
-async function showResult() {
-  const data = await loadData();
-  const doneCount = Object.keys(data).length;
-  if (doneCount < TOTAL) {
-    alert(`褰撳墠浠?${doneCount} / ${TOTAL} 浜哄畬鎴愰棶鍗凤紝闇€鍏ㄩ儴瀹屾垚鍚庢墠鑳芥煡鐪嬬粨鏋溿€俙);
-    return;
-  }
+// ==================== 缁撴灉灞曠ず ====================
+function showResults(groups) {
+  var colors = { A: '#667eea', B: '#e91e63', C: '#4caf50' };
+  var html = '<h2 style="color:#fff;margin-bottom:16px;font-size:22px">鍒嗙粍缁撴灉</h2>';
+  html += '<p style="color:rgba(255,255,255,0.8);margin-bottom:20px">浠ヤ笅鏄牴鎹棶鍗峰尮閰嶇殑鏈€浼樺鑸嶅垎閰嶆柟妗?/p>';
 
-  showPwdModal(() => {
-    const groups = computeMatching(data);
-    if (!groups) { alert('鏁版嵁寮傚父锛岃閲嶇疆鍚庨噸璇?); return; }
-
-    const colors = { A: '#667eea', B: '#e91e63', C: '#4caf50' };
-
-    let html = '<h2 style="color:#fff;margin-bottom:16px;font-size:22px">鍒嗙粍缁撴灉</h2>';
-    html += '<p style="color:rgba(255,255,255,0.8);margin-bottom:20px">浠ヤ笅鏄牴鎹棶鍗峰尮閰嶇殑鏈€浼樺鑸嶅垎閰嶆柟妗?/p>';
-
-    groups.forEach(g => {
-      const scorePct = Math.round(g.score * 100);
-      html += `<div class="result-card dorm-${g.id.toLowerCase()}">
-        <h3>瀹胯垗 ${g.id} <span style="font-size:14px;font-weight:400;color:#888">锛堝尮閰嶅害 ${scorePct}%锛?/span></h3>
-        <div class="score">鍏?浜?/div>
-        <div class="member-list">`;
-      g.members.forEach(m => {
-        html += `<div class="member-tag">
-          <span class="dot" style="background:${colors[g.id]}"></span>
-          绗?${m} 浣嶅悓瀛?        </div>`;
-      });
-      html += '</div></div>';
+  groups.forEach(function(g) {
+    var scorePct = Math.round(g.score * 100);
+    html += '<div class="result-card dorm-' + g.id.toLowerCase() + '"><h3>瀹胯垗 ' + g.id + ' <span style="font-size:14px;font-weight:400;color:#888">锛堝尮閰嶅害 ' + scorePct + '%锛?/span></h3><div class="score">鍏?浜?/div><div class="member-list">';
+    g.members.forEach(function(m) {
+      html += '<div class="member-tag"><span class="dot" style="background:' + colors[g.id] + '"></span>绗?' + m + ' 浣嶅悓瀛?/div>';
     });
-
-    html += `<button class="btn btn-outline" onclick="goHome()">杩斿洖棣栭〉</button>`;
-    document.getElementById('result-content').innerHTML = html;
-    showPage('result-page');
+    html += '</div></div>';
   });
-}
 
-// ==================== 閲嶇疆 ====================
-async function resetAll() {
-  if (confirm('纭畾瑕佹竻闄ゆ墍鏈夐棶鍗锋暟鎹悧锛熸鎿嶄綔涓嶅彲鎭㈠锛?)) {
-    const ok = await saveAllData({});
-    if (ok) {
-      alert('鎵€鏈夋暟鎹凡娓呴櫎锛?);
-    } else {
-      alert('娓呴櫎澶辫触锛岃妫€鏌ョ綉缁滃悗閲嶈瘯');
-    }
-    goHome();
-  }
+  html += '<button class="btn btn-outline" onclick="goHome()">杩斿洖棣栭〉</button>';
+  document.getElementById('result-content').innerHTML = html;
+  showPage('result-page');
 }
 
 // ==================== 鍒濆鍖?====================
-// 瀹夊叏鍏滃簳锛?绉掑悗鏃犺API鏄惁鍝嶅簲閮藉埛鏂版樉绀?setTimeout(() => {
-  const grid = document.getElementById('person-grid');
-  if (grid && grid.querySelector('.loading-overlay')) {
-    grid.innerHTML = '<div style="text-align:center;padding:30px;color:#e53935">杩炴帴瓒呮椂锛岃妫€鏌ョ綉缁滃悗鍒锋柊椤甸潰</div>';
-  }
-}, 7000);
 renderHome();
 </script>
 </body>
